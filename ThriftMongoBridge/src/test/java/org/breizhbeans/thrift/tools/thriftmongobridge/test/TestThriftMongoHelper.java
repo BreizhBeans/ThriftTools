@@ -21,6 +21,7 @@ package org.breizhbeans.thrift.tools.thriftmongobridge.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.thrift.TBase;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TSimpleJSONProtocol;
 import org.breizhbeans.thrift.tools.thriftmongobridge.TBSONSerializer;
@@ -38,8 +39,71 @@ import com.mongodb.util.JSON;
 
 public class TestThriftMongoHelper {
 
+	
+	@Test 
+	public void testTBSONObjectList() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+		
+		AnotherThrift anotherThrift1 = new AnotherThrift();
+		anotherThrift1.setAnotherString("str1");
+		anotherThrift1.setAnotherInteger(31);
+		
+		AnotherThrift anotherThrift2 = new AnotherThrift();
+		anotherThrift2.setAnotherString("str2");
+		anotherThrift2.setAnotherInteger(32);
+		
+		BSonObjectList bsonObjectList = new BSonObjectList();
+		bsonObjectList.setSimpleString("simple string");
+		bsonObjectList.addToAnotherThrift(anotherThrift1);
+		bsonObjectList.addToAnotherThrift(anotherThrift2);
+		
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(bsonObjectList);
+
+		assertEquals(bsonObjectList, dbObject);				
+	}
+	
 	@Test
-	public void testTBSONSerializer() throws Exception {
+	public void testTBSONComposite() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+		
+		BSonThrift inputBsonThrift = new BSonThrift();
+		inputBsonThrift.setOneString("string value");
+		
+		BSonComposite bsonComposite = new BSonComposite();
+		bsonComposite.setSimpleString("simple string");
+		bsonComposite.setBsonThrift(inputBsonThrift);
+		
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(bsonComposite);
+
+		assertEquals(bsonComposite, dbObject);		
+	}
+
+	@Test
+	public void testTBSONCompositeNLevel() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+		
+		AnotherThrift anotherThrift = new AnotherThrift();
+		anotherThrift.setAnotherString("str1");
+		anotherThrift.setAnotherInteger(32);
+		
+		BSonThrift inputBsonThrift = new BSonThrift();
+		inputBsonThrift.setOneString("string value");
+		inputBsonThrift.setAnotherThrift(anotherThrift);
+		
+		BSonComposite bsonComposite = new BSonComposite();
+		bsonComposite.setSimpleString("simple string");
+		bsonComposite.setBsonThrift(inputBsonThrift);
+		
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(bsonComposite);
+
+		assertEquals(bsonComposite, dbObject);		
+	}	
+	
+	@Test
+	public void testTBSONSerializerList() throws Exception {
 		TBSONSerializer tbsonSerializer = new TBSONSerializer();
 
 		BSonThrift inputBsonThrift = new BSonThrift();
@@ -50,15 +114,26 @@ public class TestThriftMongoHelper {
 		inputBsonThrift.addToOneStringList("toto2");
 		inputBsonThrift.addToOneStringList("toto3");
 
-		TSerializer tjsonSerializer = new TSerializer(new TSimpleJSONProtocol.Factory());
-		byte[] jsonObject = tjsonSerializer.serialize(inputBsonThrift);
-
-		DBObject expectedDBObject = (DBObject) JSON.parse(new String(jsonObject));
+		// serialize into DBObject
 		DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
 
-		Assert.assertEquals(expectedDBObject.toString(), dbObject.toString());
+		assertEquals(inputBsonThrift, dbObject);
 	}
 
+	private void assertEquals( final TBase<?,?> thriftObject, final DBObject dbObject ) throws Exception {
+		//serialize the thrift object in JSON
+		TSerializer tjsonSerializer = new TSerializer(new TSimpleJSONProtocol.Factory());
+		byte[] jsonObject = tjsonSerializer.serialize(thriftObject);
+		
+		// Parse the JSON into DBObject
+		DBObject expectedDBObject = (DBObject) JSON.parse(new String(jsonObject));
+		
+		System.out.println("Thrift source=" + expectedDBObject.toString());
+		System.out.println("DB     source=" + dbObject.toString());
+		// Are the DBObject equals ?
+		Assert.assertEquals(expectedDBObject.toString(), dbObject.toString());
+	}
+	
 	@Test
 	public void testSerializeIntegrity() throws Exception {
 		BSonThrift inputBsonThrift = new BSonThrift();
@@ -86,17 +161,22 @@ public class TestThriftMongoHelper {
 		// get a single collection
 		DBCollection collection = db.getCollection("dummyColl");
 
-		// build an thrift object
-		BSonThrift bsonThrift = null;
+		for (int i = 0; i < 500; i++) {
 
-		for (int i = 0; i < 5; i++) {
-
-			bsonThrift = new BSonThrift();
-			bsonThrift.setOneString("string value" + i);
-			bsonThrift.setOneBigInteger(123456 + i);
-
+			AnotherThrift anotherThrift = new AnotherThrift();
+			anotherThrift.setAnotherString("str1");
+			anotherThrift.setAnotherInteger(32);
+			
+			BSonThrift inputBsonThrift = new BSonThrift();
+			inputBsonThrift.setOneString("string value");
+			inputBsonThrift.setAnotherThrift(anotherThrift);
+			
+			BSonComposite bsonComposite = new BSonComposite();
+			bsonComposite.setSimpleString("simple string");
+			bsonComposite.setBsonThrift(inputBsonThrift);
+			
 			long startTime = System.nanoTime();
-			DBObject dbObject = ThriftMongoHelper.thrift2DBObject(bsonThrift);
+			DBObject dbObject = ThriftMongoHelper.thrift2DBObject(bsonComposite);
 			long endTime = System.nanoTime();
 			System.out.println("serialisation  nano time=" + (endTime - startTime));
 
@@ -109,8 +189,9 @@ public class TestThriftMongoHelper {
 			DBObject dbObject = cursorDoc.next();
 
 			long startTime = System.nanoTime();
-			ThriftMongoHelper.DBObject2Thrift(dbObject);
+			BSonThrift thirftObject = (BSonThrift) ThriftMongoHelper.DBObject2Thrift(dbObject);
 			long endTime = System.nanoTime();
+			System.out.print("Rock=" + thirftObject.toString() );
 			System.out.println("deserialisation nano time=" + (endTime - startTime));
 		}
 

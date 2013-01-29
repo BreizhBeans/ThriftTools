@@ -76,8 +76,9 @@ public class TBSONProtocol extends TProtocol {
 		void add(int value) {}
 		void add(long value) {}
 		void add(double value) {}
-		public void addList(DBObject dbList) {
-			this.dbObject = dbList;
+		void add(DBObject value) {}
+		public void addDBObject(DBObject dbObject) {
+			this.dbObject = dbObject;
 			
 		}
 	}
@@ -114,6 +115,11 @@ public class TBSONProtocol extends TProtocol {
 			dbList.put(index.toString(), value);
 			index++;
 		}
+		
+		void add(DBObject value) {
+			dbList.put(index.toString(), value);
+			index++;
+		}
 	}
 
 	protected class StructContext extends Context {
@@ -141,6 +147,14 @@ public class TBSONProtocol extends TProtocol {
 		}
 	}
 
+	protected boolean isWriteContextEmpty() {
+		Stack<Context> stack = threadSafeContextStack.get();
+		if( stack == null || stack.size() == 0) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Pop the last write context off the stack
 	 */
@@ -166,16 +180,29 @@ public class TBSONProtocol extends TProtocol {
 	}
 
 	public void writeStructBegin(TStruct struct) throws TException {
-		// writeContext_.write();
-		// trans_.write(LBRACE);
 		StructContext c = new StructContext();
 		pushWriteContext(c);
-		threadSafeDBObject.set(c.dbObject);
 	}
 
 	public void writeStructEnd() throws TException {
+		// Gets the struct
 		DBObject dbObject = popWriteContext().dbObject;
+		
+		// Sets the DBObject for output
 		threadSafeDBObject.set(dbObject);
+		
+		//if the stack is not empty add the struct current stack field
+		if ( isWriteContextEmpty() == false ) {
+			Context fieldContext = peekWriteContext();
+			
+			// For the ListContext adds the strcut to the context
+			if( fieldContext instanceof ListContext) {
+				fieldContext.add(dbObject);
+			} else {
+				// Thrift general field adds the object to the field
+				fieldContext.addDBObject(dbObject);
+			}
+		}
 	}
 
 	public void writeFieldBegin(TField field) throws TException {
@@ -186,10 +213,11 @@ public class TBSONProtocol extends TProtocol {
 
 	public void writeFieldEnd() throws TException {
 		Context c = popWriteContext();
+		Context dbObjectContext = peekWriteContext();
 		if( c.dbObject == null ) {
-			threadSafeDBObject.get().put( ((FieldContext)c).name, ((FieldContext)c).value);
+			dbObjectContext.dbObject.put( ((FieldContext)c).name, ((FieldContext)c).value);
 		} else {
-			threadSafeDBObject.get().put( ((FieldContext)c).name, c.dbObject);
+			dbObjectContext.dbObject.put( ((FieldContext)c).name, c.dbObject);
 		}
 	}
 
@@ -217,7 +245,7 @@ public class TBSONProtocol extends TProtocol {
 		ListContext list = (ListContext) popWriteContext();
 		// Add the list to the current field
 		Context fieldContext = peekWriteContext();
-		fieldContext.addList(list.dbList);
+		fieldContext.addDBObject(list.dbList);
 		
 	}
 
