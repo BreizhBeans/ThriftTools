@@ -19,7 +19,9 @@
 package org.breizhbeans.thrift.tools.thriftmongobridge.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.thrift.TBase;
 import org.apache.thrift.TSerializer;
@@ -36,6 +38,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 
 public class TestThriftMongoHelper {
 
@@ -110,9 +113,16 @@ public class TestThriftMongoHelper {
 		inputBsonThrift.setOneString("string value");
 		inputBsonThrift.setOneBigInteger(123456);
 
+		// A list (like Java list)
 		inputBsonThrift.addToOneStringList("toto1");
-		inputBsonThrift.addToOneStringList("toto2");
+		inputBsonThrift.addToOneStringList("toto1");
 		inputBsonThrift.addToOneStringList("toto3");
+		
+		// A set (like Java Set)
+		inputBsonThrift.addToOneStringSet("set3");		
+		inputBsonThrift.addToOneStringSet("set1");
+		inputBsonThrift.addToOneStringSet("set2");
+		inputBsonThrift.addToOneStringSet("set1");
 
 		// serialize into DBObject
 		DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
@@ -120,6 +130,69 @@ public class TestThriftMongoHelper {
 		assertEquals(inputBsonThrift, dbObject);
 	}
 
+	@Test
+	public void testTBSONSerializerMapStringString() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+
+		BSonThrift inputBsonThrift = new BSonThrift();
+		inputBsonThrift.setOneString("string value");
+		inputBsonThrift.setOneBigInteger(123456);
+
+
+		// A Map like Java Map
+		Map<String,String> oneStringMap = new HashMap<String,String>();
+		oneStringMap.put("key1", "value1");
+		oneStringMap.put("key2", "value2");
+		inputBsonThrift.setOneStringMap(oneStringMap);
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
+
+		assertEquals(inputBsonThrift, dbObject);
+	}	
+
+	@Test
+	public void testTBSONSerializerMapStringObject() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+
+		BSonThrift inputBsonThrift = new BSonThrift();
+		inputBsonThrift.setOneString("string value");
+		inputBsonThrift.setOneBigInteger(123456);
+		
+		// A Map like Java Map
+		Map<String,AnotherThrift> oneMap = new HashMap<String,AnotherThrift>();
+		oneMap.put("key1", new AnotherThrift("value1", 1));
+		oneMap.put("key2", new AnotherThrift("value2", 2));
+		inputBsonThrift.setOneObjectMapAsValue(oneMap);
+		
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
+
+		assertEquals(inputBsonThrift, dbObject);
+	}
+
+	// An map<object,object) is writable in thrift but not in JSON
+	@Test(expected=JSONParseException.class)
+	public void testTBSONSerializerMapObjectObject() throws Exception {
+		TBSONSerializer tbsonSerializer = new TBSONSerializer();
+
+		BSonThrift inputBsonThrift = new BSonThrift();
+		inputBsonThrift.setOneString("string value");
+		inputBsonThrift.setOneBigInteger(123456);
+		
+		// A Map like Java Map
+		Map<KeyObject,AnotherThrift> oneMap = new HashMap<KeyObject,AnotherThrift>();
+		oneMap.put(new KeyObject("key1",1), new AnotherThrift("value1", 1));
+		oneMap.put(new KeyObject("key2",2), new AnotherThrift("value2", 2));
+		inputBsonThrift.setOneMapObjectKeyObjectValue(oneMap);
+		
+		// serialize into DBObject
+		DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
+
+		assertEquals(inputBsonThrift, dbObject);
+	}	
+	
+	
+	
 	private void assertEquals( final TBase<?,?> thriftObject, final DBObject dbObject ) throws Exception {
 		//serialize the thrift object in JSON
 		TSerializer tjsonSerializer = new TSerializer(new TSimpleJSONProtocol.Factory());
@@ -170,6 +243,18 @@ public class TestThriftMongoHelper {
 			BSonThrift inputBsonThrift = new BSonThrift();
 			inputBsonThrift.setOneString("string value");
 			inputBsonThrift.setAnotherThrift(anotherThrift);
+			Map<String,AnotherThrift> oneObjectMapAsValue = new HashMap<String, AnotherThrift>();
+			Map<String,String> oneStringMap = new HashMap<String, String>();
+			for (int j =0; j < 500; j++ ) {
+				inputBsonThrift.addToOneStringList("mylistIsWoderfull"+j);				
+				inputBsonThrift.addToOneStringSet("mySetIsWoderfull"+j);
+				
+				oneObjectMapAsValue.put("simple key" + j, new AnotherThrift("str in an object" + j, j));
+				oneStringMap.put("too simple key" + j, "string as value" + j);
+			}
+
+			inputBsonThrift.setOneObjectMapAsValue(oneObjectMapAsValue);
+			inputBsonThrift.setOneStringMap(oneStringMap);
 			
 			BSonComposite bsonComposite = new BSonComposite();
 			bsonComposite.setSimpleString("simple string");
@@ -189,9 +274,8 @@ public class TestThriftMongoHelper {
 			DBObject dbObject = cursorDoc.next();
 
 			long startTime = System.nanoTime();
-			BSonThrift thirftObject = (BSonThrift) ThriftMongoHelper.DBObject2Thrift(dbObject);
+			BSonComposite thirftObject = (BSonComposite) ThriftMongoHelper.DBObject2Thrift(dbObject);
 			long endTime = System.nanoTime();
-			System.out.print("Rock=" + thirftObject.toString() );
 			System.out.println("deserialisation nano time=" + (endTime - startTime));
 		}
 

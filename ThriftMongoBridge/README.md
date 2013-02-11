@@ -2,11 +2,13 @@
 
 You favorite cloud does not support Cassandra, and your business model is full Thrift ?  Don't worry, Thrift Mongo Bridge can save your life !
 
-Thrift Mongo Bridge is a simple Helper for easier the development with Thrift and MongoDB. Creation and amaintained by [Sebastien Lambour](https://twitter.com/FinistSeb) and [Horacio Gonzalez](https://twitter.com/LostInBrittany)
+Why use MongoDB when Spring Data hides Mongo ? Keep the power with Thrift Mongo Bridge !
+
+Thrift Mongo Bridge is a simple Helper for easier the development with Thrift and MongoDB. Created and maintained by [Sebastien Lambour](https://twitter.com/FinistSeb) and [Horacio Gonzalez](https://twitter.com/LostInBrittany)
 
 ! WARNING !
 This version is currently under development. The Thrift support is not fully ended. Don't use it yet in production or contact us.
-The final 
+The first release will been published on central.
 
 BreizhBeans' Apache Thrift tools by @FinistSeb and @LostInBrittany
 

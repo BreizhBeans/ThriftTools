@@ -108,7 +108,12 @@ public class TBSONProtocol extends TProtocol {
 		}
 	}
 
-	protected class ListContext extends Context {
+	// Clasa for all object container likes list set and maps
+	protected class ObjectContainerContext extends Context {
+		
+	}
+	
+	protected class ListContext extends ObjectContainerContext {
 		DBObject dbList = new BasicDBList();
 		Integer index = 0;
 		void add(String value) {
@@ -121,15 +126,35 @@ public class TBSONProtocol extends TProtocol {
 			index++;
 		}
 	}
-
+	
+	protected class MapContext extends ObjectContainerContext {
+		public DBObject dbMap = new BasicDBObject();
+		
+		// A Map 
+		private String stringKey = null;
+		void add(String value) {
+			if( stringKey != null ) {
+				dbMap.put(stringKey, value);
+				stringKey = null; 
+			} else {
+				stringKey = value;
+			}
+		}
+		
+		void add(DBObject value) {
+			if( stringKey != null ) {
+				dbMap.put(stringKey, value);
+				stringKey = null;
+			} 
+		}
+	}	
+	
 	protected class StructContext extends Context {
 		public StructContext() {
 			dbObject = new BasicDBObject();
 		}
 		
 		void add(String value) {
-			// TODO Auto-generated method stub
-			
 		}
 	}
 
@@ -196,7 +221,7 @@ public class TBSONProtocol extends TProtocol {
 			Context fieldContext = peekWriteContext();
 			
 			// For the ListContext adds the strcut to the context
-			if( fieldContext instanceof ListContext) {
+			if( fieldContext instanceof ObjectContainerContext) {
 				fieldContext.add(dbObject);
 			} else {
 				// Thrift general field adds the object to the field
@@ -225,15 +250,16 @@ public class TBSONProtocol extends TProtocol {
 	}
 
 	public void writeMapBegin(TMap map) throws TException {
-		// writeContext_.write();
-		// trans_.write(LBRACE);
-		pushWriteContext(new StructContext());
-		// No metadata!
+		MapContext c = new MapContext();
+		pushWriteContext(c);	
 	}
 
 	public void writeMapEnd() throws TException {
-		popWriteContext();
-		// trans_.write(RBRACE);
+		// Gets the map
+		MapContext map = (MapContext) popWriteContext();
+		// Add the map to the current field
+		Context fieldContext = peekWriteContext();
+		fieldContext.addDBObject(map.dbMap);
 	}
 
 	public void writeListBegin(TList list) throws TException {
@@ -246,19 +272,24 @@ public class TBSONProtocol extends TProtocol {
 		// Add the list to the current field
 		Context fieldContext = peekWriteContext();
 		fieldContext.addDBObject(list.dbList);
-		
 	}
 
+	/**
+	 * A Set have the same serialization of a thrift List
+	 */
 	public void writeSetBegin(TSet set) throws TException {
-		// writeContext_.write();
-		// trans_.write(LBRACKET);
 		pushWriteContext(new ListContext());
-		// No metadata!
 	}
 
+	/**
+	 * A Set have the same serialization of a thrift List
+	 */
 	public void writeSetEnd() throws TException {
-		popWriteContext();
-		// trans_.write(RBRACKET);
+		// Gets the list
+		ListContext list = (ListContext) popWriteContext();
+		// Add the list to the current field
+		Context fieldContext = peekWriteContext();
+		fieldContext.addDBObject(list.dbList);
 	}
 
 	public void writeBool(boolean b) throws TException {
