@@ -35,6 +35,8 @@ import org.apache.thrift.transport.TTransport;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBEncoder;
+import com.mongodb.DBEncoderFactory;
 import com.mongodb.DBObject;
 
 public class TBSONProtocol extends TProtocol {
@@ -77,6 +79,7 @@ public class TBSONProtocol extends TProtocol {
 		void add(long value) {}
 		void add(double value) {}
 		void add(DBObject value) {}
+		void add(ByteBuffer bin) {}
 		public void addDBObject(DBObject dbObject) {
 			this.dbObject = dbObject;
 			
@@ -105,6 +108,10 @@ public class TBSONProtocol extends TProtocol {
 		
 		void add(double value) {
 			this.value = Double.valueOf(value);
+		}
+		
+		public void add(ByteBuffer bin) {
+			this.value = bin.array();
 		}
 	}
 
@@ -330,12 +337,7 @@ public class TBSONProtocol extends TProtocol {
 	}
 
 	public void writeBinary(ByteBuffer bin) throws TException {
-		try {
-			// TODO: Fix this
-			writeString(new String(bin.array(), bin.position() + bin.arrayOffset(), bin.limit() - bin.position() - bin.arrayOffset(), "UTF-8"));
-		} catch (UnsupportedEncodingException uex) {
-			throw new TException("JVM DOES NOT SUPPORT UTF-8");
-		}
+		peekWriteContext().add(bin);
 	}
 
 	/**
