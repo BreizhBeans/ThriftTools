@@ -40,7 +40,7 @@ import com.mongodb.Mongo;
 import com.mongodb.util.JSON;
 import com.mongodb.util.JSONParseException;
 
-public class TestThriftMongoHelper {
+public class TestSerializer {
 
 	
 	@Test 
@@ -246,8 +246,8 @@ public class TestThriftMongoHelper {
 			Map<String,AnotherThrift> oneObjectMapAsValue = new HashMap<String, AnotherThrift>();
 			Map<String,String> oneStringMap = new HashMap<String, String>();
 			for (int j =0; j < 500; j++ ) {
-				inputBsonThrift.addToOneStringList("mylistIsWoderfull"+j);				
-				inputBsonThrift.addToOneStringSet("mySetIsWoderfull"+j);
+				inputBsonThrift.addToOneStringList("mylistIsWonderfull"+j);				
+				inputBsonThrift.addToOneStringSet("mySetIsWonderfull"+j);
 				
 				oneObjectMapAsValue.put("simple key" + j, new AnotherThrift("str in an object" + j, j));
 				oneStringMap.put("too simple key" + j, "string as value" + j);

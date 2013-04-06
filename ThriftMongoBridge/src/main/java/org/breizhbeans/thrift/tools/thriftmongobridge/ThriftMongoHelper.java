@@ -18,7 +18,6 @@
  */
 package org.breizhbeans.thrift.tools.thriftmongobridge;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TSerializer;
@@ -36,33 +35,24 @@ import com.mongodb.DBObject;
 public class ThriftMongoHelper {
 
 	private static TBSONSerializer tbsonSerializer = new TBSONSerializer();
-	private static TSerializer tcompactSerializer = new TSerializer(new TCompactProtocol.Factory());
-	private static TDeserializer tcompactdeserializer = new TDeserializer(new TCompactProtocol.Factory());
+	private static TBSONDeserializer tbsonDeserializer = new TBSONDeserializer();	
 
 	public static DBObject thrift2DBObject(final TBase<?, ?> thriftObject) throws Exception {
-
 		// Thrift object serialize
-		byte[] compactData = tcompactSerializer.serialize(thriftObject);
-
 		// Construction of the dbobject
 		DBObject dbObject = tbsonSerializer.serialize(thriftObject);
-
+		
 		// Add the thrift serialization to the dbobject
 		dbObject.put("classname", thriftObject.getClass().getCanonicalName());
-		dbObject.put("binarycontent", new String(Base64.encodeBase64(compactData)));
 
 		return dbObject;
 	}
 
 	public static TBase<?, ?> DBObject2Thrift(final DBObject dbObject) throws Exception {
 		String classname = (String) dbObject.get("classname");
-		String b64BinaryContent = (String) dbObject.get("binarycontent");
-
-		byte[] thriftBinaryContent = Base64.decodeBase64(b64BinaryContent);
-
 		TBase<?, ?> thriftObject = (TBase<?, ?>) Class.forName(classname).newInstance();
 
-		tcompactdeserializer.deserialize(thriftObject, thriftBinaryContent);
+		tbsonDeserializer.deserialize(thriftObject, dbObject);
 
 		return thriftObject;
 	}
