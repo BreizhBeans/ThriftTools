@@ -2,9 +2,11 @@ package org.breizhbeans.thrift.tools.thriftmongobridge.test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.thrift.TBase;
 import org.breizhbeans.thrift.tools.thriftmongobridge.TBSONDeserializer;
 import org.breizhbeans.thrift.tools.thriftmongobridge.TBSONSerializer;
@@ -170,6 +172,33 @@ public class TestDeserializer {
 		
 		Assert.assertEquals(inputBsonThrift, actualThriftObject);	
 	}	
+	
+	@Test
+	public void testTBSONBinaryObject() throws Exception {
+		TBSONDeserializer deserializer = new TBSONDeserializer();
+
+		BSonThrift inputBsonThrift = new BSonThrift();
+
+		byte[] binaryData = { (byte) 0x00, (byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05,
+		      (byte) 0x06, (byte) 0x07, (byte) 0x08, (byte) 0x09, (byte) 0x0a, (byte) 0x0b, (byte) 0x0c, (byte) 0x0d, (byte) 0x0e,
+		      (byte) 0x0f, (byte) 0xf0, (byte) 0xf1, (byte) 0xf2, (byte) 0xf3, (byte) 0xf4, (byte) 0xf5, (byte) 0xf6, (byte) 0xf7,
+		      (byte) 0xf8, (byte) 0xf9, (byte) 0xfa, (byte) 0xfb, (byte) 0xfc, (byte) 0xfd, (byte) 0xfe, (byte) 0xff };
+
+		
+		inputBsonThrift.setBinaryData(binaryData);
+		
+		// serialize into DBObject
+		DBObject expectedDbObject = getDBObject(inputBsonThrift);
+		
+		System.out.println("expected DBObject=" + expectedDbObject.toString());
+		BSonThrift actualThriftObject = new BSonThrift();
+		deserializer.deserialize(actualThriftObject, expectedDbObject);
+		
+		System.out.println("actual   DBObject=" + actualThriftObject.toString());
+		
+		Assert.assertEquals(inputBsonThrift, actualThriftObject);			
+	}
+	
 	
 	private DBObject getDBObject( TBase<?,?> tbase) throws Exception {
 		TBSONSerializer tbsonSerializer = new TBSONSerializer();

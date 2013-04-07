@@ -654,7 +654,7 @@ public class TBSONProtocol extends TProtocol {
 	}
 
 	public ByteBuffer readBinary() throws TException {
-		return ByteBuffer.wrap(new byte[0]);
+		return ByteBuffer.wrap((byte[]) getCurrentFieldValue());
 	}
 
 	public void reset() {

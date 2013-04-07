@@ -22,6 +22,7 @@ struct BSonThrift {
 	8:map<string,string> oneStringMap,
 	9:map<string,AnotherThrift> oneObjectMapAsValue,
 	10:map<KeyObject,AnotherThrift> oneMapObjectKeyObjectValue,
+	11:binary binaryData,
 }
 
 struct BSonComposite {
