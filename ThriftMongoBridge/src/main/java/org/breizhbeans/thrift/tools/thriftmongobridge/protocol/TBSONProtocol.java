@@ -533,6 +533,11 @@ public class TBSONProtocol extends TProtocol {
 					break;
 				}
 			}
+			// An enum type is deserialized as an I32
+			if (TType.ENUM == type) {
+				type = TType.I32; 
+			}
+			
 			return new TField("", type, id);
 		} catch (Exception exp) {
 			TException texp = new TException("Unexpected getTField fieldName=" + fieldName, exp);

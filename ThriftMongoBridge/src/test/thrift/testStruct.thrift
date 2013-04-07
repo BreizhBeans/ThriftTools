@@ -1,5 +1,11 @@
 namespace java org.breizhbeans.thrift.tools.thriftmongobridge.test
 
+enum ThriftEnum {
+  VALUE_ONE  = 1,
+  VALUE_TWO = 2,
+  VALUE_THREE  = 3,
+}
+
 
 struct AnotherThrift {
 	1:string anotherString,
@@ -23,6 +29,7 @@ struct BSonThrift {
 	9:map<string,AnotherThrift> oneObjectMapAsValue,
 	10:map<KeyObject,AnotherThrift> oneMapObjectKeyObjectValue,
 	11:binary binaryData,
+	12:ThriftEnum thriftEnum
 }
 
 struct BSonComposite {

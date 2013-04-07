@@ -199,6 +199,25 @@ public class TestDeserializer {
 		Assert.assertEquals(inputBsonThrift, actualThriftObject);			
 	}
 	
+	@Test
+	public void testTBSONEnum() throws Exception {
+		TBSONDeserializer deserializer = new TBSONDeserializer();
+
+		BSonThrift inputBsonThrift = new BSonThrift();
+
+		inputBsonThrift.setThriftEnum(ThriftEnum.VALUE_THREE);
+		
+		// serialize into DBObject
+		DBObject expectedDbObject = getDBObject(inputBsonThrift);
+		
+		System.out.println("expected DBObject=" + expectedDbObject.toString());
+		BSonThrift actualThriftObject = new BSonThrift();
+		deserializer.deserialize(actualThriftObject, expectedDbObject);
+		
+		System.out.println("actual   DBObject=" + actualThriftObject.toString());
+		
+		Assert.assertEquals(inputBsonThrift, actualThriftObject);			
+	}	
 	
 	private DBObject getDBObject( TBase<?,?> tbase) throws Exception {
 		TBSONSerializer tbsonSerializer = new TBSONSerializer();
