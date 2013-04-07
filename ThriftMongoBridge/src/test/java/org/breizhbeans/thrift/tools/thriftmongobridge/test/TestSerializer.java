@@ -223,7 +223,7 @@ public class TestSerializer {
 		DBObject dbObject = ThriftMongoHelper.thrift2DBObject(inputBsonThrift);
 		outputBsonThrift = (BSonThrift) ThriftMongoHelper.DBObject2Thrift(dbObject);
 
-		Assert.assertEquals(outputBsonThrift, inputBsonThrift);
+		Assert.assertEquals(inputBsonThrift, outputBsonThrift);
 	}
 
 	@Test

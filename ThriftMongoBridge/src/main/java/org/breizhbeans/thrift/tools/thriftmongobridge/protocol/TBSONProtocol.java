@@ -439,6 +439,8 @@ public class TBSONProtocol extends TProtocol {
 			} else {
 				thriftObject = this.threadSafeTBase.get();
 				dbObject = getDBObject();
+				// reserved name for the thrift deserialisation
+				dbObject.removeField("classname");
 			} 
 			context.setDbObject(dbObject);
 			context.thriftObject = thriftObject;
@@ -486,7 +488,7 @@ public class TBSONProtocol extends TProtocol {
 					switch (entry.getValue().valueMetaData.type) {
 					case TType.LIST:
 						ListMetaData listMetaData = (ListMetaData) entry.getValue().valueMetaData;
-						if( listMetaData.isStruct()) {
+						if( listMetaData.elemMetaData.isStruct()) {
 							return ((StructMetaData) listMetaData.elemMetaData).structClass.newInstance();
 						}
 						return null;						
