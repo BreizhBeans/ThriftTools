@@ -51,7 +51,7 @@
 				<artifactId>maven-thrift-plugin</artifactId>
 				<version>0.1.10</version>
 				<configuration>
-					<thriftExecutable>/private/slambour/thrift</thriftExecutable>
+					<thriftExecutable>thrift</thriftExecutable>
 				</configuration>
 				<executions>
 					<execution>
