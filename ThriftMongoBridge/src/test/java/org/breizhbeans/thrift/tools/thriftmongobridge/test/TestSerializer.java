@@ -226,6 +226,7 @@ public class TestSerializer {
 		Assert.assertEquals(inputBsonThrift, outputBsonThrift);
 	}
 
+    /*
 	@Test
 	public void testPerfThriftMongoHelper() throws Exception {
 		Mongo mongo = new Mongo("localhost", 27017);
@@ -286,4 +287,5 @@ public class TestSerializer {
 
 		collection.remove(new BasicDBObject());
 	}
+	*/
 }
