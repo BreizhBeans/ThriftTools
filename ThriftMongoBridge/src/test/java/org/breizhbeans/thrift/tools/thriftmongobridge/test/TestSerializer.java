@@ -234,6 +234,7 @@ public class TestSerializer {
 		// get a single collection
 		DBCollection collection = db.getCollection("dummyColl");
 
+        long startTime = System.currentTimeMillis();
 		for (int i = 0; i < 500; i++) {
 
 			AnotherThrift anotherThrift = new AnotherThrift();
@@ -260,24 +261,28 @@ public class TestSerializer {
 			bsonComposite.setSimpleString("simple string");
 			bsonComposite.setBsonThrift(inputBsonThrift);
 			
-			long startTime = System.nanoTime();
+
 			DBObject dbObject = ThriftMongoHelper.thrift2DBObject(bsonComposite);
-			long endTime = System.nanoTime();
-			System.out.println("serialisation  nano time=" + (endTime - startTime));
 
 			// Put the document with the thrift introspection and the binary
 			collection.insert(dbObject);
 
 		}
+        long endTime = System.currentTimeMillis();
+        System.out.println("serialisation  time=" + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
 		DBCursor cursorDoc = collection.find();
 		while (cursorDoc.hasNext()) {
 			DBObject dbObject = cursorDoc.next();
 
-			long startTime = System.nanoTime();
+
 			BSonComposite thirftObject = (BSonComposite) ThriftMongoHelper.DBObject2Thrift(dbObject);
-			long endTime = System.nanoTime();
-			System.out.println("deserialisation nano time=" + (endTime - startTime));
+
+			//System.out.println("deserialisation nano time=" + (endTime - startTime));
 		}
+        endTime = System.currentTimeMillis();
+        System.out.println("deserialisation time=" + (endTime - startTime));
 
 		collection.remove(new BasicDBObject());
 	}
