@@ -9,6 +9,6 @@ package org.breizhbeans.thrift.tools.thriftmongobridge.test;
  */
 public class Calc {
     public int minus(int i, int i1) {
-        return i - i1;  //To change body of created methods use File | Settings | File Templates.
+        return  i1 - i ;
     }
 }
