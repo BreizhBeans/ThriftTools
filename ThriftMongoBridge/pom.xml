@@ -7,7 +7,7 @@
     <version>0.0.1</version>
     <packaging>jar</packaging>
 
-	<name>Thrift Mongo thrift</name>
+	<name>Thrift Mongo Bridge</name>
     <description></description>
     <url>
         https://github.com/BreizhBeans/ThriftTools/tree/master/ThriftMongoBridge
@@ -21,9 +21,11 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@BreizhBeans/ThriftTools.git</connection>
+        <connection>scm:git:https://github.com/BreizhBeans/ThriftTools.git</connection>
+        <developerConnection>scm:git:https://github.com/BreizhBeans/ThriftTools.git</developerConnection>
         <url>${project.url}</url>
     </scm>
+
     <developers>
       <developer>
         <name>Sébastien Lambour</name>
@@ -124,21 +126,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-            <!-- check the pom compliance for sonatype deploiement-->
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>0.7</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 		</plugins>
 	</build>
 </project>
