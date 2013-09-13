@@ -160,6 +160,11 @@ public class TBSONProtocol extends TProtocol {
 			index++;
 		}
 
+        void add(int value) {
+            dbList.put(index.toString(), value);
+            index++;
+        }
+
 		void add(DBObject value) {
 			dbList.put(index.toString(), value);
 			index++;

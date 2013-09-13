@@ -4,9 +4,47 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.breizhbeans.thrift.tools</groupId>
 	<artifactId>thriftMongoBridge</artifactId>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
+
 	<name>Thrift Mongo thrift</name>
-	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+    <description></description>
+    <url>
+        https://github.com/BreizhBeans/ThriftTools/tree/master/ThriftMongoBridge
+    </url>
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@BreizhBeans/ThriftTools.git</connection>
+        <url>${project.url}</url>
+    </scm>
+    <developers>
+      <developer>
+        <name>Sébastien Lambour</name>
+        <id>slambour</id>
+        <email>sebastien.lambour@gmail.com</email>
+        <organization></organization>
+        <roles>
+            <role>Java Developer</role>
+        </roles>
+      </developer>
+        <developer>
+            <name>Horacio Gonzalez</name>
+            <id>LostInBrittany</id>
+            <email>horacio.gonzalez@gmail.com</email>
+            <organization></organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
+    </developers>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.thrift</groupId>
@@ -45,7 +83,23 @@
 	</pluginRepositories>
 
 	<build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}</directory>
+                <targetPath>META-INF</targetPath>
+                <includes>
+                    <include>LICENSE</include>
+                    <include>NOTICE</include>
+                </includes>
+            </resource>
+        </resources>
+
 		<plugins>
+            <!-- thrift compile plugin-->
 			<plugin>
 				<groupId>org.apache.thrift.tools</groupId>
 				<artifactId>maven-thrift-plugin</artifactId>
@@ -70,6 +124,21 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <!-- check the pom compliance for sonatype deploiement-->
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.7</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 </project>

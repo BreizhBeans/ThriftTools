@@ -41,16 +41,12 @@ public class ThriftMongoHelper {
 		// Thrift object serialize
 		// Construction of the dbobject
 		DBObject dbObject = tbsonSerializer.serialize(thriftObject);
-		
-		// Add the thrift serialization to the dbobject
-		dbObject.put("classname", thriftObject.getClass().getCanonicalName());
 
 		return dbObject;
 	}
 
-	public static TBase<?, ?> DBObject2Thrift(final DBObject dbObject) throws Exception {
-		String classname = (String) dbObject.get("classname");
-		TBase<?, ?> thriftObject = (TBase<?, ?>) Class.forName(classname).newInstance();
+	public static TBase<?, ?> DBObject2Thrift(final DBObject dbObject, Class<?> thriftClass) throws Exception {
+		TBase<?, ?> thriftObject = (TBase<?, ?>) thriftClass.newInstance();
 
 		tbsonDeserializer.deserialize(thriftObject, dbObject);
 

@@ -42,6 +42,20 @@ import com.mongodb.util.JSONParseException;
 
 public class TestSerializer {
 
+    @Test
+    public void testTBSONObjectListEnum() throws Exception {
+        TBSONSerializer tbsonSerializer = new TBSONSerializer();
+
+        ThriftEnumList thriftEnumList = new ThriftEnumList();
+
+        thriftEnumList.addToThriftEnums(ThriftEnum.VALUE_ONE);
+        thriftEnumList.addToThriftEnums(ThriftEnum.VALUE_TWO);
+
+        // serialize into DBObject
+        DBObject dbObject = tbsonSerializer.serialize(thriftEnumList);
+
+        assertEquals(thriftEnumList, dbObject);
+    }
 	
 	@Test 
 	public void testTBSONObjectList() throws Exception {
@@ -221,7 +235,7 @@ public class TestSerializer {
 		inputBsonThrift.setOneStringList(oneStringList);
 
 		DBObject dbObject = ThriftMongoHelper.thrift2DBObject(inputBsonThrift);
-		outputBsonThrift = (BSonThrift) ThriftMongoHelper.DBObject2Thrift(dbObject);
+		outputBsonThrift = (BSonThrift) ThriftMongoHelper.DBObject2Thrift(dbObject, BSonThrift.class);
 
 		Assert.assertEquals(inputBsonThrift, outputBsonThrift);
 	}
