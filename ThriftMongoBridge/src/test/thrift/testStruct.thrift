@@ -56,7 +56,8 @@ struct BSonThrift {
 	9:map<string,AnotherThrift> oneObjectMapAsValue,
 	10:map<KeyObject,AnotherThrift> oneMapObjectKeyObjectValue,
 	11:binary binaryData,
-	12:ThriftEnum thriftEnum
+	12:ThriftEnum thriftEnum,
+	13:list<double> oneDoubleList,
 }
 
 struct BSonComposite {

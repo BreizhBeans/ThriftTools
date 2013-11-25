@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.breizhbeans.thrift.tools</groupId>
 	<artifactId>thriftMongoBridge</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
 	<name>Thrift Mongo Bridge</name>
@@ -50,13 +50,13 @@
 		<dependency>
 			<groupId>org.apache.thrift</groupId>
 			<artifactId>libthrift</artifactId>
-			<version>0.9.0</version>
+			<version>0.9.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>2.10.1</version>
+			<version>2.11.3</version>
 		</dependency>
 
 		<!-- test dependencies -->
@@ -100,13 +100,22 @@
         </resources>
 
 		<plugins>
+      		<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-compiler-plugin</artifactId>
+        		<version>3.1</version>
+        		<configuration>
+          			<source>1.7</source>
+          			<target>1.7</target>
+        		</configuration>
+      		</plugin>
             <!-- thrift compile plugin-->
 			<plugin>
 				<groupId>org.apache.thrift.tools</groupId>
 				<artifactId>maven-thrift-plugin</artifactId>
 				<version>0.1.10</version>
 				<configuration>
-					<thriftExecutable>/private/slambour/thrift</thriftExecutable>
+					<thriftExecutable>/opt/thrift-0.9.1/bin/thrift</thriftExecutable>
 				</configuration>
 				<executions>
 					<execution>
@@ -125,6 +134,14 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <arguments>-f path/to/pom</arguments>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 </project>

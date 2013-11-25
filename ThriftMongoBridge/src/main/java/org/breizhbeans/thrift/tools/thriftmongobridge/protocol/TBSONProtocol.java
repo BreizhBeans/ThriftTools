@@ -89,27 +89,19 @@ public class TBSONProtocol extends TProtocol {
 	private static final TList EMPTY_LIST = new TList();
 	private static final TMap EMPTY_MAP = new TMap();
 
-	protected class Context {
+	protected abstract class Context {
 		public DBObject dbObject = null;
 		public Object thriftObject;
 
-		void add(String value) {
-		}
+        abstract void add(String value);
 
-		void add(int value) {
-		}
+        abstract void add(int value);
 
-		void add(long value) {
-		}
+        abstract void add(long value);
 
-		void add(double value) {
-		}
+        abstract void add(double value);
 
-		void add(DBObject value) {
-		}
-
-		void add(ByteBuffer bin) {
-		}
+        abstract void add(ByteBuffer bin);
 
 		public void addDBObject(DBObject dbObject) {
 			this.dbObject = dbObject;
@@ -147,8 +139,8 @@ public class TBSONProtocol extends TProtocol {
 	}
 
 	// Clasa for all object container likes list set and maps
-	protected class ObjectContainerContext extends Context {
-
+	protected abstract class ObjectContainerContext extends Context {
+        abstract void add(DBObject value);
 	}
 
 	protected class ListContext extends ObjectContainerContext {
@@ -161,14 +153,32 @@ public class TBSONProtocol extends TProtocol {
 		}
 
         void add(int value) {
-            dbList.put(index.toString(), value);
+            dbList.put(index.toString(), Integer.valueOf(value));
             index++;
         }
 
-		void add(DBObject value) {
+        @Override
+        void add(long value) {
+            dbList.put(index.toString(), Long.valueOf(value));
+            index++;
+        }
+
+        void add(double value) {
+            dbList.put(index.toString(), Double.valueOf(value));
+            index++;
+        }
+
+        @Override
+        void add(ByteBuffer bin) {
+            dbList.put(index.toString(), bin.array());
+            index++;
+        }
+
+        void add(DBObject value) {
 			dbList.put(index.toString(), value);
 			index++;
 		}
+
 
 		Object next() {
 			Object object = dbList.get(index);
@@ -200,7 +210,39 @@ public class TBSONProtocol extends TProtocol {
 			}
 		}
 
-		void add(DBObject value) {
+        @Override
+        void add(int value) {
+            if (stringKey != null) {
+                dbMap.put(stringKey,Integer.valueOf(value));
+                stringKey = null;
+            }
+        }
+
+        @Override
+        void add(long value) {
+            if (stringKey != null) {
+                dbMap.put(stringKey,Long.valueOf(value));
+                stringKey = null;
+            }
+        }
+
+        @Override
+        void add(double value) {
+            if (stringKey != null) {
+                dbMap.put(stringKey,Double.valueOf(value));
+                stringKey = null;
+            }
+        }
+
+        @Override
+        void add(ByteBuffer bin) {
+            if (stringKey != null) {
+                dbMap.put(stringKey, bin.array());
+                stringKey = null;
+            }
+        }
+
+        void add(DBObject value) {
 			if (stringKey != null) {
 				dbMap.put(stringKey, value);
 				stringKey = null;
@@ -233,9 +275,30 @@ public class TBSONProtocol extends TProtocol {
 			dbObject = new BasicDBObject();
 		}
 
+        @Override
 		void add(String value) {
 		}
-	}
+
+        @Override
+        void add(int value) {
+            // Nothing to do
+        }
+
+        @Override
+        void add(long value) {
+            // Nothing to do
+        }
+
+        @Override
+        void add(double value) {
+            // Nothing to do
+        }
+
+        @Override
+        void add(ByteBuffer bin) {
+            // Nothing to do
+        }
+    }
 
 	/**
 	 * Push a new write context onto the stack.
@@ -302,7 +365,7 @@ public class TBSONProtocol extends TProtocol {
 
 			// For the ListContext adds the strcut to the context
 			if (fieldContext instanceof ObjectContainerContext) {
-				fieldContext.add(dbObject);
+                ((ObjectContainerContext)fieldContext).add(dbObject);
 			} else {
 				// Thrift general field adds the object to the field
 				fieldContext.addDBObject(dbObject);

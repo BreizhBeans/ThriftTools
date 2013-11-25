@@ -18,11 +18,9 @@
  */
 package org.breizhbeans.thrift.tools.thriftmongobridge.test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TSimpleJSONProtocol;
@@ -31,14 +29,10 @@ import org.breizhbeans.thrift.tools.thriftmongobridge.ThriftMongoHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.util.JSON;
-import com.mongodb.util.JSONParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestSerializer {
 
@@ -143,6 +137,21 @@ public class TestSerializer {
 
 		assertEquals(inputBsonThrift, dbObject);
 	}
+
+    @Test
+    public void testTBSONSerializerListDouble() throws Exception {
+        TBSONSerializer tbsonSerializer = new TBSONSerializer();
+
+        BSonThrift inputBsonThrift = new BSonThrift();
+
+        inputBsonThrift.addToOneDoubleList((double)8.324);
+        inputBsonThrift.addToOneDoubleList((double)8.327);
+
+        // serialize into DBObject
+        DBObject dbObject = tbsonSerializer.serialize(inputBsonThrift);
+
+        assertEquals(inputBsonThrift, dbObject);
+    }
 
 	@Test
 	public void testTBSONSerializerMapStringString() throws Exception {

@@ -18,19 +18,15 @@
  */
 package org.breizhbeans.thrift.tools.thriftmongobridge.test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
+import com.mongodb.DBObject;
 import junit.framework.Assert;
-
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.thrift.TBase;
 import org.breizhbeans.thrift.tools.thriftmongobridge.TBSONDeserializer;
 import org.breizhbeans.thrift.tools.thriftmongobridge.TBSONSerializer;
 import org.junit.Test;
 
-import com.mongodb.DBObject;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestDeserializer {
 
@@ -136,7 +132,11 @@ public class TestDeserializer {
 		inputBsonThrift.addToOneStringList("toto1");
 		inputBsonThrift.addToOneStringList("toto1");
 		inputBsonThrift.addToOneStringList("toto3");
-		
+
+        //A List of double
+        inputBsonThrift.addToOneDoubleList((double)8.123);
+        inputBsonThrift.addToOneDoubleList((double)8.129);
+
 		// A set (like Java Set)
 		inputBsonThrift.addToOneStringSet("set3");		
 		inputBsonThrift.addToOneStringSet("set1");
